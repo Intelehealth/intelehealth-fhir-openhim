@@ -1,2 +1,2 @@
-# intelehealth-path-openhim
-Repository for Path OpenHIM
+# intelehealth-fhir-openhim
+Repository for FHIR OpenHIM
