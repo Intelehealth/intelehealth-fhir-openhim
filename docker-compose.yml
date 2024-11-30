@@ -1,0 +1,54 @@
+version: '3'
+
+networks:
+  openhim:
+
+services:
+  mongo-db:
+    container_name: mongo-db
+    image: fahadkabir/mongo:4.0
+    networks:
+      - openhim
+    volumes:
+      - "mongo-data:/data/db"
+    restart: unless-stopped
+
+  openhim-core:
+    container_name: openhim-core
+    image: fahadkabir/openhim-core:1.0
+    restart: unless-stopped
+    environment:
+      mongo_url: "mongodb://mongo-db/openhim-development"
+      mongo_atnaUrl: "mongodb://mongo-db/openhim-development"
+      NODE_ENV: "development"
+      api_authenticationTypes: '["token", "basic", "openid", "local"]'
+    ports:
+      - "8080:8080"
+      - "5000:5000"
+      - "5001:5001"
+    networks:
+      - openhim
+    healthcheck:
+     test: "curl -sSk https://openhim-core:8080/heartbeat || exit 1"
+     interval: 30s
+     timeout: 30s
+     retries: 3
+
+  openhim-console:
+    container_name: openhim-console
+    image: fahadkabir/openhim-console:1.0
+    restart: unless-stopped
+    networks:
+      - openhim
+    ports:
+      - "9000:80"
+    healthcheck:
+     test: "curl -sS http://openhim-console || exit 1"
+     interval: 30s
+     timeout: 30s
+     retries: 3
+    volumes:
+      - ./default.json:/usr/share/nginx/html/config/default.json
+
+volumes:
+  mongo-data:
